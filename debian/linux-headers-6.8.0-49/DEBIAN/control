@@ -1,0 +1,14 @@
+Package: linux-headers-6.8.0-49
+Source: linux
+Version: 6.8.0-49.49
+Architecture: all
+Maintainer: Ubuntu Kernel Team <kernel-team@lists.ubuntu.com>
+Installed-Size: 83835
+Depends: coreutils
+Section: devel
+Priority: optional
+Multi-Arch: foreign
+Description: Header files related to Linux kernel version 6.8.0
+ This package provides kernel header files for version 6.8.0, for sites
+ that want the latest kernel headers. Please read
+ /usr/share/doc/linux-headers-6.8.0-49/debian.README.gz for details

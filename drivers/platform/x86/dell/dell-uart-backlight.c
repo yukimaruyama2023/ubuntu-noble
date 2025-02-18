@@ -38,9 +38,8 @@ static struct tty_struct *tty;
 static struct file *ftty;
 
 unsigned int (*io_serial_in)(struct uart_port *p, int offset);
-int (*uart_write)(struct tty_struct *tty, const unsigned char *buf, int count);
+ssize_t (*uart_write)(struct tty_struct *tty, const u8 *buf, size_t count);
 void (*uart_flush_chars)(struct tty_struct *tty);
-
 
 static bool force;
 module_param(force, bool, 0444);
@@ -196,11 +195,10 @@ static void dell_uart_dump_cmd(const char *func, const char *prefix,
 
 	snprintf(buf, 80, "dell_uart_backlight:%s:%s", func, prefix);
 	if (len != 0)
-		print_hex_dump_debug(buf, DUMP_PREFIX_NONE,
-					16, 1, cmd, len, false);
+		print_hex_dump_debug(buf, DUMP_PREFIX_NONE, 16, 1, cmd, len,
+				     false);
 	else
 		pr_debug("dell_uart_backlight:%s:%sNULL\n", func, prefix);
-
 }
 
 /*
@@ -344,14 +342,14 @@ static int dell_uart_show_firmware_ver(struct dell_uart_backlight *dell_pdata)
 			continue;
 		}
 
-		dell_uart_read(uart, bl_cmd->ret+1, rx_len-1);
+		dell_uart_read(uart, bl_cmd->ret + 1, rx_len - 1);
 		break;
 	}
 	mutex_unlock(&dell_pdata->brightness_mutex);
 
 	dell_uart_dump_cmd(__func__, "rx: ", bl_cmd->ret, rx_len);
 
-	pr_debug("Firmare str(%d)= %s\n", (int)bl_cmd->ret[0], bl_cmd->ret+2);
+	pr_debug("Firmare str(%d)= %s\n", (int)bl_cmd->ret[0], bl_cmd->ret + 2);
 	return rx_len;
 }
 
@@ -363,7 +361,8 @@ static int dell_uart_get_display_mode(struct dell_uart_backlight *dell_pdata)
 	int status = 0, retry = 10;
 
 	do {
-		dell_uart_dump_cmd(__func__, "tx: ", bl_cmd->cmd, bl_cmd->tx_len);
+		dell_uart_dump_cmd(__func__, "tx: ", bl_cmd->cmd,
+				   bl_cmd->tx_len);
 
 		if (mutex_lock_killable(&dell_pdata->brightness_mutex) < 0) {
 			pr_debug("Failed to get mutex_lock");
@@ -427,13 +426,14 @@ static int dell_uart_bl_add(struct acpi_device *dev)
 		if (dmi_check_system(dell_uart_backlight_alpha_platform)) {
 			/* try another command to make sure there is no scalar IC */
 			if (dell_uart_show_firmware_ver(dell_pdata) <= 4) {
-				pr_debug("Scalar is not in charge of brightness adjustment.\n");
+				pr_debug(
+					"Scalar is not in charge of brightness adjustment.\n");
 				kfree_sensitive(dell_pdata);
 				return -ENODEV;
 			}
-		}
-		else if (!dell_uart_get_display_mode(dell_pdata)) {
-			pr_debug("Scalar is not in charge of brightness adjustment.\n");
+		} else if (!dell_uart_get_display_mode(dell_pdata)) {
+			pr_debug(
+				"Scalar is not in charge of brightness adjustment.\n");
 			kfree_sensitive(dell_pdata);
 			return -ENODEV;
 		}
@@ -444,8 +444,7 @@ static int dell_uart_bl_add(struct acpi_device *dev)
 	props.max_brightness = 100;
 
 	dell_uart_bd = backlight_device_register("dell_uart_backlight",
-						 &dev->dev,
-						 dell_pdata,
+						 &dev->dev, dell_pdata,
 						 &dell_uart_backlight_ops,
 						 &props);
 	if (IS_ERR(dell_uart_bd)) {
@@ -483,11 +482,12 @@ static int dell_uart_bl_resume(struct device *dev)
 	return 0;
 }
 
-static SIMPLE_DEV_PM_OPS(dell_uart_bl_pm, dell_uart_bl_suspend, dell_uart_bl_resume);
+static SIMPLE_DEV_PM_OPS(dell_uart_bl_pm, dell_uart_bl_suspend,
+			 dell_uart_bl_resume);
 
 static const struct acpi_device_id dell_uart_bl_ids[] = {
-	{"DELL0501", 0},
-	{"", 0},
+	{ "DELL0501", 0 },
+	{ "", 0 },
 };
 
 static struct acpi_driver dell_uart_backlight_driver = {
