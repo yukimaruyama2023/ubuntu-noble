@@ -301,6 +301,11 @@ static inline int is_syscall_trace_event(struct trace_event_call *tp_event)
  * include the prototypes if CONFIG_ARCH_HAS_SYSCALL_WRAPPER is enabled.
  */
 #ifndef CONFIG_ARCH_HAS_SYSCALL_WRAPPER
+// custom syscall
+asmlinkage long sys_hello(void);
+asmlinkage long sys_register_metrics(u32 port, u64 phys_addr, u32 size);
+asmlinkage long sys_reset_metrics_vector();
+
 asmlinkage long sys_io_setup(unsigned nr_reqs, aio_context_t __user *ctx);
 asmlinkage long sys_io_destroy(aio_context_t ctx);
 asmlinkage long sys_io_submit(aio_context_t, long,
